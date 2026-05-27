@@ -73,6 +73,12 @@ button:disabled {
   border-left: 4px solid #c00;
 }
 
+.loading-message {
+  margin-top: 1rem;
+  color: #555;
+  font-weight: 600;
+}
+
 .review-result {
   margin-top: 2rem;
   padding: 1.5rem;
@@ -81,76 +87,47 @@ button:disabled {
   border: 1px solid #ddd;
 }
 
-.score-section {
-  margin-bottom: 1.5rem;
-  padding-bottom: 1rem;
-  border-bottom: 2px solid #ddd;
-}
-
-.score-section h2 {
-  margin: 0;
+.review-result h2 {
+  margin: 0 0 1rem;
   color: #333;
 }
 
-.score {
-  font-size: 1.5rem;
-  font-weight: bold;
+.review-markdown {
+  background-color: #fff;
+  border: 1px solid #e1e1e1;
+  border-radius: 6px;
+  padding: 1rem;
+  line-height: 1.6;
+  color: #222;
 }
 
-.score-95, .score-90 {
-  color: #2d8a2d;
+.review-markdown h1,
+.review-markdown h2,
+.review-markdown h3 {
+  margin: 0.75rem 0 0.5rem;
+  color: #222;
 }
 
-.score-85, .score-80 {
-  color: #4a90e2;
+.review-markdown p {
+  margin: 0.5rem 0;
 }
 
-.score-70 {
-  color: #f5a623;
+.review-markdown ul,
+.review-markdown ol {
+  margin: 0.5rem 0 0.75rem;
+  padding-left: 1.25rem;
 }
 
-.score-50 {
-  color: #d0021b;
-}
-
-.issues-section,
-.suggestions-section {
-  margin-bottom: 1.5rem;
-}
-
-.issues-section h3,
-.suggestions-section h3 {
-  margin-top: 0;
-  color: #333;
-}
-
-.issues-section ul,
-.suggestions-section ul {
-  list-style-position: inside;
-  padding: 0;
-}
-
-.issue,
-.suggestion {
-  padding: 0.5rem;
-  margin-bottom: 0.5rem;
+.review-markdown code {
+  font-family: 'Courier New', monospace;
+  background: #f4f4f4;
+  padding: 0.1rem 0.3rem;
   border-radius: 4px;
 }
 
-.issue {
-  background-color: #ffe6e6;
-  color: #c00;
-}
-
-.suggestion {
-  background-color: #e6f2ff;
-  color: #0052a3;
-}
-
-.success-message {
-  background-color: #e6ffe6;
-  color: #2d8a2d;
-  padding: 1rem;
-  border-radius: 8px;
-  font-weight: 600;
+.review-markdown pre {
+  background: #f4f4f4;
+  padding: 0.75rem;
+  border-radius: 6px;
+  overflow-x: auto;
 }

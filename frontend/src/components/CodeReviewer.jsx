@@ -1,5 +1,9 @@
 import { useState } from 'react';
 import axios from 'axios';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+import { oneLight } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import '../styles/CodeReviewer.css';
 
 export default function CodeReviewer() {
@@ -12,7 +16,7 @@ export default function CodeReviewer() {
     e.preventDefault();
     
     if (!code.trim()) {
-      setError('Please paste some code');
+      setError('Please paste some code to review.');
       return;
     }
 
@@ -24,9 +28,9 @@ export default function CodeReviewer() {
       const response = await axios.post('http://127.0.0.1:8000/api/review', {
         code: code
       });
-      setReview(response.data);
+      setReview(response.data.review || 'No review content returned.');
     } catch (err) {
-      setError('Error connecting to backend: ' + (err.message || 'Unknown error'));
+      setError('Failed to generate review. Please try again.');
       console.error(err);
     } finally {
       setIsLoading(false);
@@ -49,43 +53,48 @@ export default function CodeReviewer() {
           />
         </div>
         <button type="submit" disabled={isLoading}>
-          {isLoading ? 'Analyzing...' : 'Get Code Review'}
+          {isLoading ? 'Reviewing code...' : 'Get Code Review'}
         </button>
       </form>
+
+      {isLoading && <div className="loading-message">Reviewing code...</div>}
 
       {error && <div className="error-message">{error}</div>}
 
       {review && (
         <div className="review-result">
-          <div className="score-section">
-            <h2>Code Quality Score: <span className={`score score-${review.score}`}>{review.score}/100</span></h2>
+          <h2>AI Review</h2>
+          <div className="review-markdown">
+            <ReactMarkdown
+              remarkPlugins={[remarkGfm]}
+              components={{
+                code({ inline, className, children, ...props }) {
+                  const match = /language-(\w+)/.exec(className || '');
+
+                  if (!inline && match) {
+                    return (
+                      <SyntaxHighlighter
+                        style={oneLight}
+                        language={match[1]}
+                        PreTag="div"
+                        {...props}
+                      >
+                        {String(children).replace(/\n$/, '')}
+                      </SyntaxHighlighter>
+                    );
+                  }
+
+                  return (
+                    <code className={className} {...props}>
+                      {children}
+                    </code>
+                  );
+                }
+              }}
+            >
+              {review}
+            </ReactMarkdown>
           </div>
-
-          {review.issues.length > 0 && (
-            <div className="issues-section">
-              <h3>Issues Found:</h3>
-              <ul>
-                {review.issues.map((issue, idx) => (
-                  <li key={idx} className="issue">{issue}</li>
-                ))}
-              </ul>
-            </div>
-          )}
-
-          {review.suggestions.length > 0 && (
-            <div className="suggestions-section">
-              <h3>Suggestions:</h3>
-              <ul>
-                {review.suggestions.map((suggestion, idx) => (
-                  <li key={idx} className="suggestion">{suggestion}</li>
-                ))}
-              </ul>
-            </div>
-          )}
-
-          {review.issues.length === 0 && review.suggestions.length === 0 && (
-            <div className="success-message">Great code! No issues found.</div>
-          )}
         </div>
       )}
     </div>
