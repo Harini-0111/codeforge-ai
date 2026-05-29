@@ -4,6 +4,8 @@ from openai import OpenAI
 
 load_dotenv()
 
+MODEL_NAME = "meta-llama/llama-3.1-70b-instruct"
+
 client = OpenAI(
     api_key=os.getenv("OPENROUTER_API_KEY"),
     base_url="https://openrouter.ai/api/v1",
@@ -31,7 +33,7 @@ def review_code(code: str) -> str:
     )
 
     response = client.chat.completions.create(
-        model="meta-llama/llama-3.1-70b-instruct",
+        model=MODEL_NAME,
         messages=[
             {"role": "system", "content": "You are a senior code reviewer."},
             {"role": "user", "content": prompt},

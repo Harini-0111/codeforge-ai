@@ -11,6 +11,17 @@
   text-align: center;
 }
 
+.review-layout {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 1.5rem;
+  align-items: start;
+}
+
+.review-main {
+  min-width: 0;
+}
+
 .form-group {
   margin-bottom: 1rem;
 }
@@ -87,9 +98,42 @@ button:disabled {
   border: 1px solid #ddd;
 }
 
+.review-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+}
+
 .review-result h2 {
-  margin: 0 0 1rem;
+  margin: 0;
   color: #333;
+}
+
+.review-meta {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.review-timestamp {
+  color: #666;
+}
+
+.language-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  background-color: #eef3ff;
+  color: #1f4aa0;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
 }
 
 .review-markdown {
@@ -130,4 +174,89 @@ button:disabled {
   padding: 0.75rem;
   border-radius: 6px;
   overflow-x: auto;
+}
+
+.history-panel {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 1rem;
+  background: #fff;
+}
+
+.history-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.history-panel h2 {
+  margin: 0;
+  color: #333;
+  font-size: 1.1rem;
+}
+
+.history-empty {
+  color: #666;
+  font-size: 0.9rem;
+  padding: 0.5rem 0;
+}
+
+.history-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.history-item {
+  width: 100%;
+  text-align: left;
+  border: 1px solid #e1e1e1;
+  border-radius: 8px;
+  padding: 0.75rem;
+  background: #fafafa;
+  cursor: pointer;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.history-item:hover {
+  border-color: #c9d7ff;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.06);
+}
+
+.history-item-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.history-item-title {
+  font-weight: 600;
+  color: #333;
+}
+
+.history-item-meta {
+  margin-top: 0.35rem;
+  color: #777;
+  font-size: 0.85rem;
+}
+
+.history-item-snippet {
+  margin-top: 0.5rem;
+  color: #555;
+  font-size: 0.85rem;
+  font-family: 'Courier New', monospace;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+@media (max-width: 900px) {
+  .review-layout {
+    grid-template-columns: 1fr;
+  }
 }

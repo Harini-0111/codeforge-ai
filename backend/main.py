@@ -1,8 +1,15 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+
+from database import init_db
 from routes.review import router
 
 app = FastAPI()
+
+
+@app.on_event("startup")
+def on_startup() -> None:
+    init_db()
 
 # CORS middleware
 app.add_middleware(

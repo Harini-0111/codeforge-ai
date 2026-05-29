@@ -1,3 +1,3 @@
-from .review import CodeReviewRequest, CodeReviewResponse
+from .review import CodeReviewRequest, Review, ReviewResponse
 
-__all__ = ["CodeReviewRequest", "CodeReviewResponse"]
+__all__ = ["CodeReviewRequest", "Review", "ReviewResponse"]
