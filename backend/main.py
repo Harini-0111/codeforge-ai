@@ -2,7 +2,8 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from database import init_db
-from routes.review import router
+from routes.project import router as project_router
+from routes.review import router as review_router
 
 app = FastAPI()
 
@@ -25,4 +26,5 @@ app.add_middleware(
 )
 
 # Include routes
-app.include_router(router)
+app.include_router(review_router)
+app.include_router(project_router)
