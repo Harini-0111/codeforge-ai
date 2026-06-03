@@ -1,12 +1,13 @@
 .code-reviewer {
-  max-width: 900px;
+  max-width: 1100px;
   margin: 0 auto;
-  padding: 2rem;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  padding: 2.5rem 2rem 3rem;
+  font-family: var(--sans);
+  animation: riseIn 0.6s ease-out;
 }
 
 .code-reviewer h1 {
-  color: #333;
+  color: var(--text-h);
   margin-bottom: 1.5rem;
   text-align: center;
 }
@@ -38,7 +39,7 @@
   padding: 1rem;
   border: 2px solid #ddd;
   border-radius: 8px;
-  font-family: 'Courier New', monospace;
+  font-family: var(--mono);
   font-size: 0.95rem;
   resize: vertical;
 }
@@ -55,7 +56,7 @@
 }
 
 button {
-  background-color: #0066cc;
+  background-color: var(--accent);
   color: white;
   padding: 0.75rem 2rem;
   border: none;
@@ -67,7 +68,7 @@ button {
 }
 
 button:hover:not(:disabled) {
-  background-color: #0052a3;
+  background-color: var(--accent-dark);
 }
 
 button:disabled {
@@ -93,7 +94,7 @@ button:disabled {
 .review-result {
   margin-top: 2rem;
   padding: 1.5rem;
-  background-color: #f9f9f9;
+  background-color: #f9f8f4;
   border-radius: 8px;
   border: 1px solid #ddd;
 }
@@ -108,7 +109,7 @@ button:disabled {
 
 .review-result h2 {
   margin: 0;
-  color: #333;
+  color: var(--text-h);
 }
 
 .review-meta {
@@ -142,14 +143,14 @@ button:disabled {
   border-radius: 6px;
   padding: 1rem;
   line-height: 1.6;
-  color: #222;
+  color: #1a1a1a;
 }
 
 .review-markdown h1,
 .review-markdown h2,
 .review-markdown h3 {
   margin: 0.75rem 0 0.5rem;
-  color: #222;
+  color: var(--text-h);
 }
 
 .review-markdown p {
@@ -192,7 +193,7 @@ button:disabled {
 
 .history-panel h2 {
   margin: 0;
-  color: #333;
+  color: var(--text-h);
   font-size: 1.1rem;
 }
 
@@ -249,10 +250,171 @@ button:disabled {
   margin-top: 0.5rem;
   color: #555;
   font-size: 0.85rem;
-  font-family: 'Courier New', monospace;
+  font-family: var(--mono);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.project-panel {
+  margin-top: 2rem;
+  padding: 1.5rem;
+  border-radius: 16px;
+  border: 1px solid #e0d7c5;
+  background: linear-gradient(160deg, #fff7ea 0%, #fffdf8 100%);
+  box-shadow: 0 12px 24px rgba(60, 37, 20, 0.08);
+}
+
+.panel-header p {
+  margin: 0.35rem 0 0;
+  color: #5b4f44;
+}
+
+.project-form {
+  margin-top: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.project-form label {
+  font-weight: 600;
+  color: #4b3f36;
+}
+
+.project-input-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0.75rem;
+}
+
+.project-input-row input {
+  padding: 0.75rem 1rem;
+  border-radius: 10px;
+  border: 1px solid #d9c9b6;
+  font-size: 0.95rem;
+  font-family: var(--mono);
+}
+
+.project-results {
+  margin-top: 1.5rem;
+}
+
+.project-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
+}
+
+.project-card {
+  padding: 1rem;
+  border-radius: 12px;
+  background: #fff;
+  border: 1px solid #eadfce;
+  box-shadow: 0 8px 16px rgba(83, 55, 31, 0.06);
+}
+
+.project-card h3 {
+  margin: 0 0 0.65rem;
+  font-size: 1rem;
+  color: #2f251f;
+}
+
+.project-card ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.project-card li {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.6rem;
+  font-size: 0.9rem;
+  color: #4b3f36;
+}
+
+.project-card p {
+  margin: 0;
+  color: #4b3f36;
+}
+
+.badge {
+  padding: 0.15rem 0.6rem;
+  border-radius: 999px;
+  background: rgba(245, 158, 11, 0.12);
+  color: #92400e;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.project-review {
+  margin-top: 1.5rem;
+  padding: 1.25rem;
+  border-radius: 14px;
+  background: #fff;
+  border: 1px solid #eadfce;
+}
+
+.project-review h3 {
+  margin-top: 0;
+  color: #2f251f;
+}
+
+.project-review-section h4 {
+  margin: 1rem 0 0.5rem;
+  color: #2f251f;
+}
+
+.project-review-section ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.project-review-section li {
+  padding: 0.75rem;
+  border-radius: 10px;
+  background: #fbf7ef;
+  border: 1px solid #f1e4d0;
+}
+
+.project-review-section p {
+  margin: 0;
+  color: #3d3127;
+}
+
+.project-review-section .evidence {
+  margin-top: 0.35rem;
+  font-size: 0.8rem;
+  color: #7c6b5a;
+  font-family: var(--mono);
+}
+
+.project-review pre {
+  white-space: pre-wrap;
+  margin: 0;
+  font-family: var(--mono);
+  font-size: 0.85rem;
+  color: #3d3127;
+}
+
+@keyframes riseIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @media (max-width: 900px) {

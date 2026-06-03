@@ -14,6 +14,12 @@ export default function CodeReviewer() {
   const [isHistoryLoading, setIsHistoryLoading] = useState(false);
   const [error, setError] = useState('');
   const [historyError, setHistoryError] = useState('');
+  const [projectPath, setProjectPath] = useState('.');
+  const [projectScan, setProjectScan] = useState(null);
+  const [projectReview, setProjectReview] = useState(null);
+  const [projectReviewRaw, setProjectReviewRaw] = useState('');
+  const [isProjectLoading, setIsProjectLoading] = useState(false);
+  const [projectError, setProjectError] = useState('');
 
   const buildSnippet = (text, maxLength = 70) => {
     if (!text) {
@@ -60,6 +66,26 @@ export default function CodeReviewer() {
     loadHistory();
   }, []);
 
+  const parseProjectReview = (raw) => {
+    if (!raw) {
+      return null;
+    }
+
+    try {
+      return JSON.parse(raw);
+    } catch (parseError) {
+      return null;
+    }
+  };
+
+  const formatConfidence = (value) => {
+    if (typeof value !== 'number') {
+      return '';
+    }
+
+    return `${Math.round(value * 100)}%`;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     
@@ -84,6 +110,59 @@ export default function CodeReviewer() {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleProjectScan = async (e) => {
+    e.preventDefault();
+
+    if (!projectPath.trim()) {
+      setProjectError('Please provide a project path to scan.');
+      return;
+    }
+
+    setIsProjectLoading(true);
+    setProjectError('');
+    setProjectScan(null);
+    setProjectReview(null);
+    setProjectReviewRaw('');
+
+    try {
+      const response = await axios.post('http://127.0.0.1:8000/api/projects/scan', {
+        root_path: projectPath.trim()
+      });
+      const projectMap = response.data?.project_map || null;
+      const reviewText = response.data?.review || '';
+      setProjectScan(projectMap);
+      setProjectReviewRaw(reviewText);
+      setProjectReview(parseProjectReview(reviewText));
+    } catch (scanError) {
+      setProjectError('Failed to scan the project. Please try again.');
+      console.error(scanError);
+    } finally {
+      setIsProjectLoading(false);
+    }
+  };
+
+  const renderReviewSection = (title, items) => {
+    if (!items || items.length === 0) {
+      return null;
+    }
+
+    return (
+      <div className="project-review-section">
+        <h4>{title}</h4>
+        <ul>
+          {items.map((item, index) => (
+            <li key={`${title}-${index}`}>
+              <p>{item.statement}</p>
+              {item.evidence && item.evidence.length > 0 && (
+                <div className="evidence">Evidence: {item.evidence.join(', ')}</div>
+              )}
+            </li>
+          ))}
+        </ul>
+      </div>
+    );
   };
 
   return (
@@ -154,6 +233,114 @@ export default function CodeReviewer() {
               </div>
             </div>
           )}
+
+          <section className="project-panel">
+            <div className="panel-header">
+              <div>
+                <h2>Project Analysis</h2>
+                <p>Scan a local project folder to generate a project map and grounded review.</p>
+              </div>
+            </div>
+
+            <form className="project-form" onSubmit={handleProjectScan}>
+              <label htmlFor="projectPath">Project path</label>
+              <div className="project-input-row">
+                <input
+                  id="projectPath"
+                  type="text"
+                  value={projectPath}
+                  onChange={(e) => setProjectPath(e.target.value)}
+                  placeholder="."
+                  disabled={isProjectLoading}
+                />
+                <button type="submit" disabled={isProjectLoading}>
+                  {isProjectLoading ? 'Scanning...' : 'Scan Project'}
+                </button>
+              </div>
+            </form>
+
+            {projectError && <div className="error-message">{projectError}</div>}
+            {isProjectLoading && <div className="loading-message">Scanning project...</div>}
+
+            {projectScan && (
+              <div className="project-results">
+                <div className="project-grid">
+                  <div className="project-card">
+                    <h3>Project Name</h3>
+                    <p>{projectScan.project_name}</p>
+                  </div>
+                  <div className="project-card">
+                    <h3>Frameworks</h3>
+                    <ul>
+                      {projectScan.framework_confidence?.map((framework) => (
+                        <li key={framework.name}>
+                          <span>{framework.name}</span>
+                          <span className="badge">{formatConfidence(framework.confidence)}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                  <div className="project-card">
+                    <h3>Languages</h3>
+                    <ul>
+                      {projectScan.languages?.map((language) => (
+                        <li key={language}>{language}</li>
+                      ))}
+                    </ul>
+                  </div>
+                  <div className="project-card">
+                    <h3>Package Managers</h3>
+                    <ul>
+                      {projectScan.package_managers?.map((manager) => (
+                        <li key={manager}>{manager}</li>
+                      ))}
+                    </ul>
+                  </div>
+                  <div className="project-card">
+                    <h3>Important Files</h3>
+                    <ul>
+                      {projectScan.important_files?.map((item) => (
+                        <li key={item}>{item}</li>
+                      ))}
+                    </ul>
+                  </div>
+                  <div className="project-card">
+                    <h3>Entry Points</h3>
+                    <ul>
+                      {projectScan.entry_points?.map((entry) => (
+                        <li key={entry}>{entry}</li>
+                      ))}
+                    </ul>
+                  </div>
+                  <div className="project-card">
+                    <h3>Database Signals</h3>
+                    <ul>
+                      {projectScan.database_signals?.map((signal) => (
+                        <li key={signal.name}>
+                          <span>{signal.name}</span>
+                          <span className="badge">{signal.evidence?.length || 0} files</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+
+                <div className="project-review">
+                  <h3>Grounded Project Review</h3>
+                  {projectReview ? (
+                    <>
+                      {renderReviewSection('Overview', projectReview.overview)}
+                      {renderReviewSection('Architecture Notes', projectReview.architecture_notes)}
+                      {renderReviewSection('Risks', projectReview.risks)}
+                      {renderReviewSection('Opportunities', projectReview.opportunities)}
+                    </>
+                  ) : (
+                    <pre>{projectReviewRaw || 'No review content returned.'}</pre>
+                  )}
+                </div>
+              </div>
+            )}
+          </section>
         </div>
 
         <aside className="history-panel">
