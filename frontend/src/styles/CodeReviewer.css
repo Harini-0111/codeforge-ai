@@ -168,6 +168,26 @@ button:disabled {
   background: #f4f4f4;
   padding: 0.1rem 0.3rem;
   border-radius: 4px;
+.project-examples {
+  margin-top: 0.75rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  font-size: 0.85rem;
+  color: #6b5a49;
+}
+.project-examples span {
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  background: rgba(249, 115, 22, 0.1);
+  border: 1px solid rgba(249, 115, 22, 0.2);
+  font-family: var(--mono);
+}
+.project-examples .note {
+  font-family: var(--sans);
+  background: rgba(34, 27, 20, 0.08);
+  border-color: rgba(34, 27, 20, 0.15);
+}
 }
 
 .review-markdown pre {
@@ -180,6 +200,11 @@ button:disabled {
 .history-panel {
   border: 1px solid #ddd;
   border-radius: 8px;
+.analysis-history {
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid #eee;
+}
   padding: 1rem;
   background: #fff;
 }

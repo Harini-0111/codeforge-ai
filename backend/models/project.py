@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from pydantic import BaseModel
 
 
@@ -42,3 +44,19 @@ class ProjectScanRequest(BaseModel):
 class ProjectScanResponse(BaseModel):
     project_map: ProjectMap
     review: str
+
+
+class ProjectAnalysisSummary(BaseModel):
+    id: int
+    project_name: str
+    project_path: str
+    created_at: datetime
+
+
+class ProjectAnalysisResponse(BaseModel):
+    id: int
+    project_name: str
+    project_path: str
+    project_map: ProjectMap
+    review: str
+    created_at: datetime

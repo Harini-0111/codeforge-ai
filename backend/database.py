@@ -27,5 +27,5 @@ def get_db() -> Generator:
 def init_db() -> None:
     """Create database tables if they do not already exist."""
     # Ensure models are imported so SQLAlchemy knows about them.
-    from models import review  # noqa: F401
+    from models import project_analysis, review  # noqa: F401
     Base.metadata.create_all(bind=engine)

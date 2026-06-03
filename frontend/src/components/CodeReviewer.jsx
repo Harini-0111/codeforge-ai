@@ -20,6 +20,9 @@ export default function CodeReviewer() {
   const [projectReviewRaw, setProjectReviewRaw] = useState('');
   const [isProjectLoading, setIsProjectLoading] = useState(false);
   const [projectError, setProjectError] = useState('');
+  const [projectHistory, setProjectHistory] = useState([]);
+  const [isProjectHistoryLoading, setIsProjectHistoryLoading] = useState(false);
+  const [projectHistoryError, setProjectHistoryError] = useState('');
 
   const buildSnippet = (text, maxLength = 70) => {
     if (!text) {
@@ -62,8 +65,24 @@ export default function CodeReviewer() {
     }
   };
 
+  const loadProjectHistory = async () => {
+    setIsProjectHistoryLoading(true);
+    setProjectHistoryError('');
+
+    try {
+      const response = await axios.get('http://127.0.0.1:8000/api/projects');
+      setProjectHistory(response.data || []);
+    } catch (err) {
+      setProjectHistoryError('Failed to load project analysis history.');
+      console.error(err);
+    } finally {
+      setIsProjectHistoryLoading(false);
+    }
+  };
+
   useEffect(() => {
     loadHistory();
+    loadProjectHistory();
   }, []);
 
   const parseProjectReview = (raw) => {
@@ -135,9 +154,36 @@ export default function CodeReviewer() {
       setProjectScan(projectMap);
       setProjectReviewRaw(reviewText);
       setProjectReview(parseProjectReview(reviewText));
+      await loadProjectHistory();
     } catch (scanError) {
       setProjectError('Failed to scan the project. Please try again.');
       console.error(scanError);
+    } finally {
+      setIsProjectLoading(false);
+    }
+  };
+
+  const handleProjectHistorySelect = async (analysisId) => {
+    if (!analysisId) {
+      return;
+    }
+
+    setIsProjectLoading(true);
+    setProjectError('');
+
+    try {
+      const response = await axios.get(`http://127.0.0.1:8000/api/projects/${analysisId}`);
+      const projectMap = response.data?.project_map || null;
+      const reviewText = response.data?.review || '';
+      setProjectScan(projectMap);
+      setProjectReviewRaw(reviewText);
+      setProjectReview(parseProjectReview(reviewText));
+      if (response.data?.project_path) {
+        setProjectPath(response.data.project_path);
+      }
+    } catch (historyError) {
+      setProjectError('Failed to load the project analysis.');
+      console.error(historyError);
     } finally {
       setIsProjectLoading(false);
     }
@@ -239,6 +285,12 @@ export default function CodeReviewer() {
               <div>
                 <h2>Project Analysis</h2>
                 <p>Scan a local project folder to generate a project map and grounded review.</p>
+                <div className="project-examples">
+                  <span>Examples: .</span>
+                  <span>backend</span>
+                  <span>frontend</span>
+                  <span className="note">Local paths only (no ZIP or GitHub URLs yet).</span>
+                </div>
               </div>
             </div>
 
@@ -377,6 +429,38 @@ export default function CodeReviewer() {
               ))}
             </ul>
           )}
+
+          <div className="analysis-history">
+            <div className="history-header">
+              <h2>Project Analysis History</h2>
+            </div>
+            {isProjectHistoryLoading && <div className="loading-message">Loading analyses...</div>}
+            {projectHistoryError && <div className="error-message">{projectHistoryError}</div>}
+            {!isProjectHistoryLoading && !projectHistoryError && projectHistory.length === 0 && (
+              <div className="history-empty">No project analyses yet.</div>
+            )}
+            {!isProjectHistoryLoading && projectHistory.length > 0 && (
+              <ul className="history-list">
+                {projectHistory.map((item) => (
+                  <li key={item.id}>
+                    <button
+                      type="button"
+                      className="history-item"
+                      onClick={() => handleProjectHistorySelect(item.id)}
+                    >
+                      <div className="history-item-header">
+                        <span className="history-item-title">{item.project_name}</span>
+                      </div>
+                      <div className="history-item-meta">{formatTimestamp(item.created_at)}</div>
+                      <div className="history-item-snippet">
+                        {item.project_path}
+                      </div>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
         </aside>
       </div>
     </div>
