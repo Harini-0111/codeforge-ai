@@ -23,6 +23,8 @@ export default function CodeReviewer() {
   const [projectHistory, setProjectHistory] = useState([]);
   const [isProjectHistoryLoading, setIsProjectHistoryLoading] = useState(false);
   const [projectHistoryError, setProjectHistoryError] = useState('');
+  const [projectZip, setProjectZip] = useState(null);
+  const [zipError, setZipError] = useState('');
 
   const buildSnippet = (text, maxLength = 70) => {
     if (!text) {
@@ -163,6 +165,45 @@ export default function CodeReviewer() {
     }
   };
 
+  const handleZipUpload = async (e) => {
+    e.preventDefault();
+
+    if (!projectZip) {
+      setZipError('Please choose a zip file to upload.');
+      return;
+    }
+
+    setIsProjectLoading(true);
+    setZipError('');
+    setProjectError('');
+    setProjectScan(null);
+    setProjectReview(null);
+    setProjectReviewRaw('');
+
+    try {
+      const formData = new FormData();
+      formData.append('file', projectZip);
+
+      const response = await axios.post('http://127.0.0.1:8000/api/projects/upload', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      });
+
+      const projectMap = response.data?.project_map || null;
+      const reviewText = response.data?.review || '';
+      setProjectScan(projectMap);
+      setProjectReviewRaw(reviewText);
+      setProjectReview(parseProjectReview(reviewText));
+      await loadProjectHistory();
+    } catch (uploadError) {
+      setZipError('Failed to upload the zip file. Please try again.');
+      console.error(uploadError);
+    } finally {
+      setIsProjectLoading(false);
+    }
+  };
+
   const handleProjectHistorySelect = async (analysisId) => {
     if (!analysisId) {
       return;
@@ -289,7 +330,7 @@ export default function CodeReviewer() {
                   <span>Examples: .</span>
                   <span>backend</span>
                   <span>frontend</span>
-                  <span className="note">Local paths only (no ZIP or GitHub URLs yet).</span>
+                  <span className="note">Local paths only. ZIP upload is below.</span>
                 </div>
               </div>
             </div>
@@ -312,7 +353,24 @@ export default function CodeReviewer() {
             </form>
 
             {projectError && <div className="error-message">{projectError}</div>}
+            {zipError && <div className="error-message">{zipError}</div>}
             {isProjectLoading && <div className="loading-message">Scanning project...</div>}
+
+            <div className="zip-panel">
+              <h3>Upload ZIP</h3>
+              <form className="zip-form" onSubmit={handleZipUpload}>
+                <input
+                  type="file"
+                  accept=".zip"
+                  onChange={(e) => setProjectZip(e.target.files?.[0] || null)}
+                  disabled={isProjectLoading}
+                />
+                <button type="submit" disabled={isProjectLoading}>
+                  {isProjectLoading ? 'Uploading...' : 'Upload & Analyze'}
+                </button>
+              </form>
+              <p className="zip-note">Only .zip files are supported for now.</p>
+            </div>
 
             {projectScan && (
               <div className="project-results">

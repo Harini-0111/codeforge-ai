@@ -33,8 +33,10 @@ IGNORE_DIRS = {
     "out",
 }
 
-EXCLUDED_CONTENT_PATHS = {
-    "backend/services/project_scan_service.py",
+EXCLUDED_CONTENT_FILENAMES = {
+    "project_scan_service.py",
+    "project_review_service.py",
+    "llm_service.py",
 }
 
 ALLOWED_EXTENSIONS = {
@@ -272,7 +274,7 @@ def scan_project(root_path: str) -> ProjectMap:
             )
 
             content = ""
-            if rel_path not in EXCLUDED_CONTENT_PATHS:
+            if file_path.name not in EXCLUDED_CONTENT_FILENAMES:
                 content = read_file_content(file_path)
             if content:
                 detect_frameworks(

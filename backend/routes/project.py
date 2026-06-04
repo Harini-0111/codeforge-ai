@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
 from sqlalchemy.orm import Session
 
 from database import get_db
@@ -15,6 +15,7 @@ from services.project_analysis_service import (
 )
 from services.project_review_service import generate_project_review
 from services.project_scan_service import scan_project
+from services.zip_service import save_and_extract_zip
 
 router = APIRouter()
 
@@ -53,3 +54,20 @@ def fetch_project_analysis(
     if not analysis:
         raise HTTPException(status_code=404, detail="Project analysis not found")
     return analysis
+
+
+@router.post("/api/projects/upload", response_model=ProjectScanResponse)
+def upload_project_zip(
+    file: UploadFile = File(...),
+    db: Session = Depends(get_db),
+) -> ProjectScanResponse:
+    """Upload a zip file, extract safely, and run project analysis."""
+    try:
+        extract_dir = save_and_extract_zip(file)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+    project_map = scan_project(str(extract_dir))
+    review = generate_project_review(project_map)
+    save_project_analysis(db, str(extract_dir), project_map, review)
+    return ProjectScanResponse(project_map=project_map, review=review)

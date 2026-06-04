@@ -431,6 +431,39 @@ button:disabled {
   color: #3d3127;
 }
 
+.zip-panel {
+  margin-top: 1.5rem;
+  padding: 1rem;
+  border-radius: 12px;
+  border: 1px dashed #e0d7c5;
+  background: rgba(255, 255, 255, 0.7);
+}
+
+.zip-panel h3 {
+  margin: 0 0 0.75rem;
+  color: #2f251f;
+}
+
+.zip-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.zip-form input[type='file'] {
+  border: 1px solid #d9c9b6;
+  padding: 0.6rem;
+  border-radius: 8px;
+  background: #fff;
+  font-family: var(--sans);
+}
+
+.zip-note {
+  margin: 0.5rem 0 0;
+  font-size: 0.85rem;
+  color: #6b5a49;
+}
+
 @keyframes riseIn {
   from {
     opacity: 0;
