@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session
 
 from models.project import ProjectAnalysisResponse, ProjectAnalysisSummary, ProjectMap
 from models.project_analysis import ProjectAnalysis
+from services.source_adapter_service import SourceMetadata
 
 
 def save_project_analysis(
@@ -11,6 +12,7 @@ def save_project_analysis(
     project_path: str,
     project_map: ProjectMap,
     review: str,
+    source_metadata: SourceMetadata,
 ) -> ProjectAnalysis:
     payload = (
         project_map.model_dump() if hasattr(project_map, "model_dump") else project_map.dict()
@@ -18,6 +20,10 @@ def save_project_analysis(
     record = ProjectAnalysis(
         project_name=project_map.project_name,
         project_path=project_path,
+        source_type=source_metadata.source_type,
+        source_locator=source_metadata.source_locator,
+        source_ref=source_metadata.source_ref,
+        source_commit=source_metadata.source_commit,
         project_map=json.dumps(payload, ensure_ascii=True),
         review=review,
     )
@@ -32,6 +38,10 @@ def to_project_summary(record: ProjectAnalysis) -> ProjectAnalysisSummary:
         id=record.id,
         project_name=record.project_name,
         project_path=record.project_path,
+        source_type=record.source_type,
+        source_locator=record.source_locator,
+        source_ref=record.source_ref,
+        source_commit=record.source_commit,
         created_at=record.created_at,
     )
 
@@ -42,6 +52,10 @@ def to_project_response(record: ProjectAnalysis) -> ProjectAnalysisResponse:
         id=record.id,
         project_name=record.project_name,
         project_path=record.project_path,
+        source_type=record.source_type,
+        source_locator=record.source_locator,
+        source_ref=record.source_ref,
+        source_commit=record.source_commit,
         project_map=ProjectMap(**project_map_data),
         review=record.review,
         created_at=record.created_at,

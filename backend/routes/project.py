@@ -5,17 +5,17 @@ from database import get_db
 from models.project import (
     ProjectAnalysisResponse,
     ProjectAnalysisSummary,
+    GitHubProjectRequest,
     ProjectScanRequest,
     ProjectScanResponse,
 )
-from services.project_analysis_service import (
-    get_project_analysis,
-    get_project_analyses,
-    save_project_analysis,
+from services.project_analysis_service import get_project_analysis, get_project_analyses
+from services.project_pipeline_service import analyze_project
+from services.source_adapter_service import (
+    prepare_github_source,
+    prepare_local_source,
+    prepare_zip_source,
 )
-from services.project_review_service import generate_project_review
-from services.project_scan_service import scan_project
-from services.zip_service import save_and_extract_zip
 
 router = APIRouter()
 
@@ -27,13 +27,10 @@ def scan_project_folder(
 ) -> ProjectScanResponse:
     """Scan a local project folder and return a project map + review."""
     try:
-        project_map = scan_project(request.root_path)
+        source = prepare_local_source(request.root_path)
+        return analyze_project(db, source)
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
-
-    review = generate_project_review(project_map)
-    save_project_analysis(db, request.root_path, project_map, review)
-    return ProjectScanResponse(project_map=project_map, review=review)
 
 
 @router.get("/api/projects", response_model=list[ProjectAnalysisSummary])
@@ -63,11 +60,20 @@ def upload_project_zip(
 ) -> ProjectScanResponse:
     """Upload a zip file, extract safely, and run project analysis."""
     try:
-        extract_dir = save_and_extract_zip(file)
+        source = prepare_zip_source(file)
+        return analyze_project(db, source)
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
 
-    project_map = scan_project(str(extract_dir))
-    review = generate_project_review(project_map)
-    save_project_analysis(db, str(extract_dir), project_map, review)
-    return ProjectScanResponse(project_map=project_map, review=review)
+
+@router.post("/api/projects/github", response_model=ProjectScanResponse)
+def analyze_github_repository(
+    request: GitHubProjectRequest,
+    db: Session = Depends(get_db),
+) -> ProjectScanResponse:
+    """Download and analyze a public GitHub repository."""
+    try:
+        source = prepare_github_source(request.repository_url, request.ref)
+        return analyze_project(db, source)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc

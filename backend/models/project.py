@@ -41,6 +41,11 @@ class ProjectScanRequest(BaseModel):
     root_path: str
 
 
+class GitHubProjectRequest(BaseModel):
+    repository_url: str
+    ref: str | None = None
+
+
 class ProjectScanResponse(BaseModel):
     project_map: ProjectMap
     review: str
@@ -50,6 +55,10 @@ class ProjectAnalysisSummary(BaseModel):
     id: int
     project_name: str
     project_path: str
+    source_type: str | None = None
+    source_locator: str | None = None
+    source_ref: str | None = None
+    source_commit: str | None = None
     created_at: datetime
 
 
@@ -57,6 +66,10 @@ class ProjectAnalysisResponse(BaseModel):
     id: int
     project_name: str
     project_path: str
+    source_type: str | None = None
+    source_locator: str | None = None
+    source_ref: str | None = None
+    source_commit: str | None = None
     project_map: ProjectMap
     review: str
     created_at: datetime

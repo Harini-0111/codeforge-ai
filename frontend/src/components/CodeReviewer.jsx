@@ -25,6 +25,9 @@ export default function CodeReviewer() {
   const [projectHistoryError, setProjectHistoryError] = useState('');
   const [projectZip, setProjectZip] = useState(null);
   const [zipError, setZipError] = useState('');
+  const [githubUrl, setGithubUrl] = useState('');
+  const [githubRef, setGithubRef] = useState('');
+  const [githubError, setGithubError] = useState('');
 
   const buildSnippet = (text, maxLength = 70) => {
     if (!text) {
@@ -83,6 +86,8 @@ export default function CodeReviewer() {
   };
 
   useEffect(() => {
+    // Initial history synchronization with the backend.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     loadHistory();
     loadProjectHistory();
   }, []);
@@ -94,7 +99,7 @@ export default function CodeReviewer() {
 
     try {
       return JSON.parse(raw);
-    } catch (parseError) {
+    } catch {
       return null;
     }
   };
@@ -204,6 +209,43 @@ export default function CodeReviewer() {
     }
   };
 
+  const handleGithubAnalysis = async (e) => {
+    e.preventDefault();
+
+    if (!githubUrl.trim()) {
+      setGithubError('Please provide a public GitHub repository URL.');
+      return;
+    }
+
+    setIsProjectLoading(true);
+    setGithubError('');
+    setProjectError('');
+    setZipError('');
+    setProjectScan(null);
+    setProjectReview(null);
+    setProjectReviewRaw('');
+
+    try {
+      const response = await axios.post('http://127.0.0.1:8000/api/projects/github', {
+        repository_url: githubUrl.trim(),
+        ref: githubRef.trim() || null
+      });
+
+      const projectMap = response.data?.project_map || null;
+      const reviewText = response.data?.review || '';
+      setProjectScan(projectMap);
+      setProjectReviewRaw(reviewText);
+      setProjectReview(parseProjectReview(reviewText));
+      await loadProjectHistory();
+    } catch (githubAnalysisError) {
+      const detail = githubAnalysisError.response?.data?.detail;
+      setGithubError(detail || 'Failed to analyze the GitHub repository.');
+      console.error(githubAnalysisError);
+    } finally {
+      setIsProjectLoading(false);
+    }
+  };
+
   const handleProjectHistorySelect = async (analysisId) => {
     if (!analysisId) {
       return;
@@ -219,7 +261,13 @@ export default function CodeReviewer() {
       setProjectScan(projectMap);
       setProjectReviewRaw(reviewText);
       setProjectReview(parseProjectReview(reviewText));
-      if (response.data?.project_path) {
+      if (response.data?.source_type === 'github' && response.data?.source_locator) {
+        setGithubUrl(response.data.source_locator);
+        setGithubRef(response.data.source_ref || '');
+      } else if (
+        response.data?.source_type !== 'zip'
+        && response.data?.project_path
+      ) {
         setProjectPath(response.data.project_path);
       }
     } catch (historyError) {
@@ -372,6 +420,38 @@ export default function CodeReviewer() {
               <p className="zip-note">Only .zip files are supported for now.</p>
             </div>
 
+            <div className="github-panel">
+              <h3>Analyze GitHub Repository</h3>
+              <form className="github-form" onSubmit={handleGithubAnalysis}>
+                <label htmlFor="githubUrl">Public repository URL</label>
+                <input
+                  id="githubUrl"
+                  type="url"
+                  value={githubUrl}
+                  onChange={(e) => setGithubUrl(e.target.value)}
+                  placeholder="https://github.com/owner/repository"
+                  disabled={isProjectLoading}
+                />
+                <label htmlFor="githubRef">Branch or ref (optional)</label>
+                <div className="project-input-row">
+                  <input
+                    id="githubRef"
+                    type="text"
+                    value={githubRef}
+                    onChange={(e) => setGithubRef(e.target.value)}
+                    placeholder="Uses the default branch"
+                    disabled={isProjectLoading}
+                  />
+                  <button type="submit" disabled={isProjectLoading}>
+                    {isProjectLoading ? 'Analyzing...' : 'Analyze GitHub'}
+                  </button>
+                </div>
+              </form>
+              <p className="zip-note">Phase 2A supports public GitHub repositories.</p>
+            </div>
+
+            {githubError && <div className="error-message">{githubError}</div>}
+
             {projectScan && (
               <div className="project-results">
                 <div className="project-grid">
@@ -511,7 +591,11 @@ export default function CodeReviewer() {
                       </div>
                       <div className="history-item-meta">{formatTimestamp(item.created_at)}</div>
                       <div className="history-item-snippet">
-                        {item.project_path}
+                        {item.source_type === 'github'
+                          ? `${item.source_locator}${item.source_ref ? ` · ${item.source_ref}` : ''}`
+                          : item.source_type === 'zip'
+                            ? `ZIP · ${item.source_locator}`
+                            : item.source_locator || item.project_path}
                       </div>
                     </button>
                   </li>
