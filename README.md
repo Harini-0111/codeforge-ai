@@ -1,230 +1,191 @@
 # CodeForge AI
 
 ![Python](https://img.shields.io/badge/Python-3.10+-blue?logo=python)
-![FastAPI](https://img.shields.io/badge/FastAPI-0.100+-green?logo=fastapi)
-![React](https://img.shields.io/badge/React-18.x-blue?logo=react)
-![SQLite](https://img.shields.io/badge/SQLite-Database-lightgrey?logo=sqlite)
+![FastAPI](https://img.shields.io/badge/FastAPI-0.100+-009688?logo=fastapi)
+![React](https://img.shields.io/badge/React-18.x-61DAFB?logo=react)
+![SQLite](https://img.shields.io/badge/SQLite-Database-003B57?logo=sqlite)
 ![License](https://img.shields.io/badge/License-MIT-brightgreen)
-![Last Commit](https://img.shields.io/github/last-commit/Harini-0111/codeforge-ai)
 
-CodeForge AI is an AI-powered software engineering assistant capable of analyzing projects from multiple sources. Evolving from a simple AI code reviewer, it now features a robust project scanning and shared analysis pipeline, delivering deep, evidence-grounded insights into codebases across local environments, ZIP archives, and public GitHub repositories.
+CodeForge AI is an AI-powered developer tool for reviewing code and analyzing software projects. It supports code snippets, local folders, ZIP archives, and public GitHub repositories through a shared analysis pipeline.
 
-## Project Highlights
+The current focus is code review and multi-source project analysis. Repository-Aware RAG is the next planned milestone.
 
-- **AI-powered code review**: Get instant, actionable feedback on individual code snippets with syntax highlighting.
-- **Local, ZIP, and GitHub project analysis**: Analyze projects regardless of where they are stored.
-- **Shared Project Scanner architecture**: Source-agnostic project mapping decoupled from source ingestion.
-- **Grounded AI project reviews**: Evidence-backed architectural reviews based on concrete codebase structure.
-- **Modular FastAPI backend**: Clean, extensible services separated by responsibility.
-- **Extensible source adapter architecture**: Pluggable ingestion for seamless expansion.
+---
 
-## Screenshots
+## Features
 
-* Dashboard
-* Code Review
-* Project Analysis
-* GitHub Analysis
+### Implemented
 
-*(Images coming soon)*
+#### Code Review
+- AI-powered code review
+- Review history
 
-## Key Features
+#### Project Analysis
+- Local folder analysis
+- ZIP upload analysis
+- Public GitHub repository analysis
+- Project Scanner
+- Shared Analysis Pipeline
+- SQLite persistence
 
-- **AI Code Review**: Analyze code snippets instantly and get improvement suggestions.
-- **Project Analysis**: Scan directories to extract frameworks, package managers, entry points, and database signatures.
-- **GitHub Intelligence**: Seamlessly resolve branches, SHAs, and lightweight metadata (stars, forks, descriptions) from public repositories while preserving scanner independence.
-- **Persistence & History**: Review past code and project analyses instantly, supported by a backwards-compatible SQLite persistence layer.
-- **Architecture**: Employs a decoupled architecture separating source ingestion, scanning, review generation, and presentation.
+#### GitHub Support
+- Branch and tag selection
+- Commit SHA resolution
+- Repository metadata retrieval
+
+### Next
+
+- Repository-Aware RAG
+- Pull Request Review
+- Authentication
+- Deployment
+
+---
 
 ## Architecture
 
-```mermaid
-flowchart TD
-    A[Local Folder] --> D
-    B[ZIP Upload] --> D
-    C[GitHub Repository] --> D
-    
-    D[Source Adapter] --> E[Shared Analysis Pipeline]
-    
-    E --> F[Project Scanner]
-    F --> G[Project Map]
-    
-    G --> H[Grounded AI Review]
-    
-    H --> I[Persistence]
-    I --> J[History & Dashboard]
+```text
+                    CodeForge AI
+
+ Local Folder   ZIP Upload   GitHub Repository
+         \          |          /
+          \         |         /
+           +--------+--------+
+                    |
+             Source Adapter
+                    |
+      Shared Analysis Pipeline
+                    |
+           Project Scanner
+                    |
+             Project Map
+                    |
+          AI Project Review
+                    |
+        SQLite Persistence
+                    |
+         History & Dashboard
 ```
 
-## Architecture Principles
-
-CodeForge AI is built around a few core design principles:
-
-- The Project Scanner is source-agnostic.
-- All project sources (Local, ZIP, GitHub) are normalized through Source Adapters.
-- Every analysis follows the Shared Analysis Pipeline.
-- AI reviews are grounded in the generated Project Map.
-- New project sources should integrate through the adapter layer rather than modifying the scanner.
+---
 
 ## Tech Stack
 
-**Frontend:**
+### Frontend
+
 - React
 - Vite
 - Axios
 
-**Backend:**
-- FastAPI
-- SQLAlchemy
-- OpenRouter
-- HTTPX
-- Pydantic
+### Backend
 
-**Database:**
+- FastAPI
+- Python
+- SQLAlchemy
+- Pydantic
+- HTTPX
+- OpenRouter API
+
+### Database
+
 - SQLite
+
+---
 
 ## Project Structure
 
 ```text
 codeforge-ai/
+│
 ├── backend/
-│   ├── main.py                     # FastAPI application entry point
-│   ├── database.py                 # SQLite connection and migrations
-│   ├── models/                     # Pydantic and SQLAlchemy models
-│   ├── routes/                     # API endpoints (reviews, projects)
-│   └── services/
-│       ├── archive_service.py      # Secure zip extraction
-│       ├── llm_service.py          # OpenRouter AI integration
-│       ├── project_scan_service.py # Core project parsing logic
-│       ├── source_adapter_service.py # Ingestion for Local, ZIP, GitHub
-│       ├── project_pipeline_service.py # Orchestrates analysis flow
-│       └── ...
+│   ├── models/
+│   ├── routes/
+│   ├── services/
+│   ├── utils/
+│   ├── database.py
+│   └── main.py
+│
 └── frontend/
     ├── src/
-    │   ├── components/
-    │   │   └── CodeReviewer.jsx    # Main Dashboard and UI
-    │   ├── styles/
-    │   └── App.jsx
+    ├── public/
     └── package.json
 ```
 
-## Implemented Workflow
+---
 
-1. **Source Ingestion:** A local folder, uploaded ZIP, or GitHub URL is processed by the `Source Adapter`, securely extracted if necessary, and mapped to a unified project root.
-2. **Analysis Pipeline:** The `Shared Analysis Pipeline` orchestrates the complete flow from scanning to AI generation.
-3. **Project Scanning:** The `Project Scanner` recursively maps the codebase to detect languages, frameworks, entry points, and important configuration files.
-4. **Project Map Generation:** The scanner outputs a source-agnostic `Project Map`.
-5. **Grounded Review:** The `Project Map` is fed to the LLM to generate an evidence-backed architectural review.
-6. **Persistence:** The results and repository metadata are persisted to SQLite to populate the history dashboard.
+## Getting Started
 
-## Installation & Running
+### Backend
 
-### Backend Setup
+```bash
+cd backend
 
-1. Navigate to the `backend` directory:
-   ```bash
-   cd backend
-   ```
-2. Set up a virtual environment and activate it:
-   ```bash
-   python -m venv venv
-   # On Windows:
-   .\venv\Scripts\activate
-   # On macOS/Linux:
-   source venv/bin/activate
-   ```
-3. Install the required dependencies:
-   ```bash
-   pip install -r requirements.txt
-   ```
-4. Set your OpenRouter API key:
-   ```bash
-   # On Windows (PowerShell):
-   $env:OPENROUTER_API_KEY="your_api_key_here"
-   # On macOS/Linux:
-   export OPENROUTER_API_KEY="your_api_key_here"
-   ```
-5. Start the FastAPI server:
-   ```bash
-   uvicorn main:app --reload --port 8000
-   ```
+python -m venv venv
 
-### Frontend Setup
+# Windows
+venv\Scripts\activate
 
-1. Navigate to the `frontend` directory:
-   ```bash
-   cd frontend
-   ```
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
-3. Start the Vite development server:
-   ```bash
-   npm run dev
-   ```
+# macOS / Linux
+source venv/bin/activate
 
-## API Overview
+pip install -r requirements.txt
 
-The backend provides several core endpoints to drive the intelligence pipeline:
+uvicorn main:app --reload
+```
 
-- `POST /api/review` - Accepts code snippets and returns a generated AI code review.
-- `GET /api/reviews` - Retrieves the history of generated reviews and project analyses.
-- `POST /api/projects/scan` - Analyzes a local project directory.
-- `POST /api/projects/upload` - Securely uploads, extracts, and analyzes a ZIP archive.
-- `POST /api/projects/github` - Clones, extracts, and analyzes a public GitHub repository.
+Set the `OPENROUTER_API_KEY` environment variable before starting the backend.
 
-## Current Capabilities
+### Frontend
 
-CodeForge AI currently supports:
-- **Local folder analysis**: Direct traversal of local directories.
-- **ZIP upload**: Secure extraction with file size and file count protections.
-- **GitHub Repository Analysis**:
-  - Accepts full repository URLs.
-  - Supports optional branch or tag references (e.g., `main`, `v2.31.0`).
-  - Resolves specific commit SHAs.
-  - Fetches repository metadata (stars, forks, descriptions).
-  - Handles 301 redirects and precise GitHub API error mapping (404, 403).
-- **Instant AI code review**: Contextual snippet evaluation.
-- **Project history**: Reload past analyses instantly using SQLite persistence.
-- **Grounded project reviews**: AI insights strictly tied to concrete file evidence.
+```bash
+cd frontend
+
+npm install
+
+npm run dev
+```
+
+---
+
+## API
+
+| Method | Endpoint |
+|---------|----------|
+| POST | `/api/review` |
+| GET | `/api/reviews` |
+| GET | `/api/reviews/{id}` |
+| POST | `/api/projects/scan` |
+| POST | `/api/projects/upload` |
+| POST | `/api/projects/github` |
+
+---
 
 ## Roadmap
 
-**Phase 3**
-- Repository-Aware RAG (Intelligent retrieval for large codebases)
+- Repository-Aware RAG
+- Repository-aware search
+- Pull Request Review
+- Authentication
+- Deployment
 
-**Phase 4**
-- Pull Request Review (Automated review for PR diffs)
-
-**Phase 5**
-- Authentication & Deployment (User accounts, RBAC, and Production deployment)
-
-**Phase 6**
-- Team Collaboration (Multi-user workspaces and sharing)
-
-## Project Evolution
-
-The evolution of CodeForge AI follows a strict milestone-driven approach:
-- [x] AI Code Review
-- [x] Review History
-- [x] Project Scanner
-- [x] Grounded Reviews
-- [x] Project Dashboard
-- [x] ZIP Upload
-- [x] GitHub Repository Analysis
-- [x] GitHub Intelligence
-- [ ] **Repository-Aware RAG (Next)**
-
-## Future Vision
-
-The long-term goal for CodeForge AI is to transform from an AI code reviewer into a fully **repository-aware AI software engineering assistant**. By implementing advanced RAG (Retrieval-Augmented Generation) and semantic understanding, CodeForge will enable developers to converse intelligently with massive codebases, review complex PRs autonomously, and integrate seamlessly into professional team workflows.
+---
 
 ## Contributing
 
-Contributions are welcome. Please ensure that all new features adhere strictly to our architectural principles:
-- **Preserve Source Adapter Architecture**: Keep ingestion modules completely separated from the scanner logic.
-- **Preserve Shared Analysis Pipeline**: All ingestion mechanisms must feed into the same standard pipeline.
-- **Maintain Scanner Independence**: The Project Scanner must remain entirely agnostic of where the project originated (e.g., local vs. GitHub).
+Contributions are welcome.
+
+Please keep new features aligned with the existing architecture:
+
+- Keep the Project Scanner source-independent.
+- Route new project sources through the Source Adapter layer.
+- Reuse the Shared Analysis Pipeline whenever possible.
+
+---
 
 ## License
 
 MIT License
+
+---
+
+**Built by Harini Patsa**
