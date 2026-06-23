@@ -46,6 +46,7 @@ def ensure_project_analysis_source_columns() -> None:
         "source_locator": "VARCHAR(1024)",
         "source_ref": "VARCHAR(255)",
         "source_commit": "VARCHAR(64)",
+        "repository_metadata": "TEXT",
     }
 
     with engine.begin() as connection:

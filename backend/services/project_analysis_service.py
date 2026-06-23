@@ -24,6 +24,7 @@ def save_project_analysis(
         source_locator=source_metadata.source_locator,
         source_ref=source_metadata.source_ref,
         source_commit=source_metadata.source_commit,
+        repository_metadata=json.dumps(source_metadata.repository_metadata, ensure_ascii=True) if getattr(source_metadata, "repository_metadata", None) else None,
         project_map=json.dumps(payload, ensure_ascii=True),
         review=review,
     )
@@ -42,6 +43,7 @@ def to_project_summary(record: ProjectAnalysis) -> ProjectAnalysisSummary:
         source_locator=record.source_locator,
         source_ref=record.source_ref,
         source_commit=record.source_commit,
+        repository_metadata=json.loads(record.repository_metadata) if getattr(record, "repository_metadata", None) else None,
         created_at=record.created_at,
     )
 
@@ -56,6 +58,7 @@ def to_project_response(record: ProjectAnalysis) -> ProjectAnalysisResponse:
         source_locator=record.source_locator,
         source_ref=record.source_ref,
         source_commit=record.source_commit,
+        repository_metadata=json.loads(record.repository_metadata) if getattr(record, "repository_metadata", None) else None,
         project_map=ProjectMap(**project_map_data),
         review=record.review,
         created_at=record.created_at,

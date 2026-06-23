@@ -23,6 +23,7 @@ export default function CodeReviewer() {
   const [projectHistory, setProjectHistory] = useState([]);
   const [isProjectHistoryLoading, setIsProjectHistoryLoading] = useState(false);
   const [projectHistoryError, setProjectHistoryError] = useState('');
+  const [repositoryMetadata, setRepositoryMetadata] = useState(null);
   const [projectZip, setProjectZip] = useState(null);
   const [zipError, setZipError] = useState('');
   const [githubUrl, setGithubUrl] = useState('');
@@ -151,6 +152,7 @@ export default function CodeReviewer() {
     setProjectScan(null);
     setProjectReview(null);
     setProjectReviewRaw('');
+    setRepositoryMetadata(null);
 
     try {
       const response = await axios.post('http://127.0.0.1:8000/api/projects/scan', {
@@ -161,6 +163,7 @@ export default function CodeReviewer() {
       setProjectScan(projectMap);
       setProjectReviewRaw(reviewText);
       setProjectReview(parseProjectReview(reviewText));
+      setRepositoryMetadata(response.data?.repository_metadata || null);
       await loadProjectHistory();
     } catch (scanError) {
       setProjectError('Failed to scan the project. Please try again.');
@@ -184,6 +187,7 @@ export default function CodeReviewer() {
     setProjectScan(null);
     setProjectReview(null);
     setProjectReviewRaw('');
+    setRepositoryMetadata(null);
 
     try {
       const formData = new FormData();
@@ -200,6 +204,7 @@ export default function CodeReviewer() {
       setProjectScan(projectMap);
       setProjectReviewRaw(reviewText);
       setProjectReview(parseProjectReview(reviewText));
+      setRepositoryMetadata(response.data?.repository_metadata || null);
       await loadProjectHistory();
     } catch (uploadError) {
       setZipError('Failed to upload the zip file. Please try again.');
@@ -224,6 +229,7 @@ export default function CodeReviewer() {
     setProjectScan(null);
     setProjectReview(null);
     setProjectReviewRaw('');
+    setRepositoryMetadata(null);
 
     try {
       const response = await axios.post('http://127.0.0.1:8000/api/projects/github', {
@@ -236,6 +242,7 @@ export default function CodeReviewer() {
       setProjectScan(projectMap);
       setProjectReviewRaw(reviewText);
       setProjectReview(parseProjectReview(reviewText));
+      setRepositoryMetadata(response.data?.repository_metadata || null);
       await loadProjectHistory();
     } catch (githubAnalysisError) {
       const detail = githubAnalysisError.response?.data?.detail;
@@ -253,6 +260,7 @@ export default function CodeReviewer() {
 
     setIsProjectLoading(true);
     setProjectError('');
+    setRepositoryMetadata(null);
 
     try {
       const response = await axios.get(`http://127.0.0.1:8000/api/projects/${analysisId}`);
@@ -261,6 +269,7 @@ export default function CodeReviewer() {
       setProjectScan(projectMap);
       setProjectReviewRaw(reviewText);
       setProjectReview(parseProjectReview(reviewText));
+      setRepositoryMetadata(response.data?.repository_metadata || null);
       if (response.data?.source_type === 'github' && response.data?.source_locator) {
         setGithubUrl(response.data.source_locator);
         setGithubRef(response.data.source_ref || '');
@@ -452,6 +461,22 @@ export default function CodeReviewer() {
 
             {githubError && <div className="error-message">{githubError}</div>}
 
+            {repositoryMetadata && (
+              <div className="repository-metadata-panel">
+                <h3>{repositoryMetadata.repository_name}</h3>
+                <p><strong>Owner:</strong> {repositoryMetadata.owner}</p>
+                {repositoryMetadata.description && <p><strong>Description:</strong> {repositoryMetadata.description}</p>}
+                <p>
+                  <strong>Stars:</strong> {repositoryMetadata.stars} |{' '}
+                  <strong>Forks:</strong> {repositoryMetadata.forks}
+                </p>
+                <p>
+                  <strong>Branch:</strong> {repositoryMetadata.resolved_ref}{' '}
+                  {repositoryMetadata.commit_sha && `(${repositoryMetadata.commit_sha.substring(0, 7)})`}
+                </p>
+              </div>
+            )}
+
             {projectScan && (
               <div className="project-results">
                 <div className="project-grid">
@@ -592,7 +617,7 @@ export default function CodeReviewer() {
                       <div className="history-item-meta">{formatTimestamp(item.created_at)}</div>
                       <div className="history-item-snippet">
                         {item.source_type === 'github'
-                          ? `${item.source_locator}${item.source_ref ? ` · ${item.source_ref}` : ''}`
+                          ? `${item.source_locator}${item.source_ref ? ` · ${item.source_ref}` : ''}${item.source_commit ? ` · ${item.source_commit.substring(0, 7)}` : ''}`
                           : item.source_type === 'zip'
                             ? `ZIP · ${item.source_locator}`
                             : item.source_locator || item.project_path}

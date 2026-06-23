@@ -59,6 +59,7 @@ class ProjectAnalysisSummary(BaseModel):
     source_locator: str | None = None
     source_ref: str | None = None
     source_commit: str | None = None
+    repository_metadata: dict | None = None
     created_at: datetime
 
 
@@ -70,6 +71,7 @@ class ProjectAnalysisResponse(BaseModel):
     source_locator: str | None = None
     source_ref: str | None = None
     source_commit: str | None = None
+    repository_metadata: dict | None = None
     project_map: ProjectMap
     review: str
     created_at: datetime

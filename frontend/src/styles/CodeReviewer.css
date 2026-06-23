@@ -445,6 +445,25 @@ button:disabled {
   color: #2f251f;
 }
 
+.repository-metadata-panel {
+  margin-top: 1.5rem;
+  padding: 1.25rem;
+  border-radius: 12px;
+  background: #fdfaf5;
+  border: 1px solid #e0d7c5;
+}
+
+.repository-metadata-panel h3 {
+  margin: 0 0 0.75rem;
+  color: #2f251f;
+}
+
+.repository-metadata-panel p {
+  margin: 0.35rem 0;
+  color: #4b3f36;
+  font-size: 0.95rem;
+}
+
 .zip-form {
   display: flex;
   flex-direction: column;

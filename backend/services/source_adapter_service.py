@@ -25,6 +25,7 @@ class SourceMetadata:
     source_locator: str
     source_ref: str | None = None
     source_commit: str | None = None
+    repository_metadata: dict | None = None
 
 
 @dataclass(frozen=True)
@@ -60,9 +61,54 @@ def prepare_github_source(
 ) -> PreparedProjectSource:
     owner, repository, canonical_url = parse_github_repository_url(repository_url)
     normalized_ref = ref.strip() if ref and ref.strip() else None
-    archive_url = f"https://api.github.com/repos/{owner}/{repository}/zipball"
-    if normalized_ref:
-        archive_url = f"{archive_url}/{quote(normalized_ref, safe='')}"
+
+    headers = {
+        "Accept": "application/vnd.github+json",
+        "User-Agent": "CodeForge-AI",
+    }
+    
+    # Fetch repository metadata
+    repo_url = f"https://api.github.com/repos/{owner}/{repository}"
+    try:
+        with httpx.Client(timeout=GITHUB_REQUEST_TIMEOUT_SECONDS, follow_redirects=True) as client:
+            repo_response = client.get(repo_url, headers=headers)
+            if repo_response.status_code == 404:
+                raise ValueError("Repository not found or is private")
+            if repo_response.status_code in (403, 429):
+                raise ValueError("GitHub rate limit exceeded")
+            repo_response.raise_for_status()
+            repo_data = repo_response.json()
+            
+            default_branch = repo_data.get("default_branch", "main")
+            resolved_ref = normalized_ref or default_branch
+            
+            # Fetch latest commit SHA
+            commits_url = f"https://api.github.com/repos/{owner}/{repository}/commits/{quote(resolved_ref, safe='')}"
+            commits_response = client.get(commits_url, headers=headers)
+            if commits_response.status_code == 404:
+                raise ValueError("GitHub repository or ref was not found")
+            if commits_response.status_code in (403, 429):
+                raise ValueError("GitHub rate limit exceeded")
+            commits_response.raise_for_status()
+            commit_sha = commits_response.json().get("sha")
+            
+            repository_metadata = {
+                "repository_name": repo_data.get("name"),
+                "owner": repo_data.get("owner", {}).get("login"),
+                "default_branch": default_branch,
+                "resolved_ref": resolved_ref,
+                "commit_sha": commit_sha,
+                "description": repo_data.get("description"),
+                "stars": repo_data.get("stargazers_count"),
+                "forks": repo_data.get("forks_count"),
+            }
+            
+    except httpx.TimeoutException:
+        raise ValueError("Network timeout")
+    except httpx.HTTPError as exc:
+        raise ValueError("Download failed") from exc
+
+    archive_url = f"https://api.github.com/repos/{owner}/{repository}/zipball/{quote(resolved_ref, safe='')}"
 
     workspace = create_source_workspace("github")
     try:
@@ -82,7 +128,9 @@ def prepare_github_source(
         metadata=SourceMetadata(
             source_type="github",
             source_locator=canonical_url,
-            source_ref=normalized_ref,
+            source_ref=resolved_ref,
+            source_commit=commit_sha,
+            repository_metadata=repository_metadata,
         ),
     )
 
@@ -128,6 +176,8 @@ def download_github_archive(url: str, destination: Path) -> None:
         ) as response:
             if response.status_code == 404:
                 raise ValueError("GitHub repository or ref was not found")
+            if response.status_code in (403, 429):
+                raise ValueError("GitHub rate limit exceeded")
             if response.status_code >= 400:
                 raise ValueError(
                     f"GitHub archive download failed with status {response.status_code}"
@@ -144,5 +194,7 @@ def download_github_archive(url: str, destination: Path) -> None:
                     if total_bytes > MAX_GITHUB_ARCHIVE_BYTES:
                         raise ValueError("GitHub repository archive exceeds size limit")
                     handle.write(chunk)
+    except httpx.TimeoutException:
+        raise ValueError("Network timeout")
     except httpx.HTTPError as exc:
-        raise ValueError("Unable to download the GitHub repository") from exc
+        raise ValueError("Download failed") from exc

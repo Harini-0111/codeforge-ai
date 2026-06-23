@@ -15,6 +15,7 @@ class ProjectAnalysis(Base):
     source_locator = Column(String(1024), nullable=True)
     source_ref = Column(String(255), nullable=True)
     source_commit = Column(String(64), nullable=True)
+    repository_metadata = Column(Text, nullable=True)
     project_map = Column(Text, nullable=False)
     review = Column(Text, nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
