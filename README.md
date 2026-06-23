@@ -54,17 +54,17 @@ The current focus is code review and multi-source project analysis. Repository-A
                     |
              Source Adapter
                     |
-      Shared Analysis Pipeline
+         Shared Analysis Pipeline
                     |
-           Project Scanner
+             Project Scanner
                     |
-             Project Map
+               Project Map
                     |
-          AI Project Review
+           AI Project Review
                     |
-        SQLite Persistence
+           SQLite Persistence
                     |
-         History & Dashboard
+           History & Dashboard
 ```
 
 ---
@@ -188,4 +188,4 @@ MIT License
 
 ---
 
-**Built by Harini Patsa**
+**Built by Harini**
