@@ -45,7 +45,7 @@ The current focus is code review and multi-source project analysis. Repository-A
 ## Architecture
 
 ```text
-                    CodeForge AI
+               CodeForge AI
 
  Local Folder   ZIP Upload   GitHub Repository
          \          |          /
